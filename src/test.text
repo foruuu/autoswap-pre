@@ -1,0 +1,86 @@
+const { blockchain: __blockchain__ } = require('../config/config');
+const keystore = require(__blockchain__.keystore);
+const program = require('caporal');
+const password = require('password-prompt');
+const Ethers = require('ethers');
+const { Wallet } = require('kcc-bridge-sdk').wallet;
+const { TransactionJobBase } = require('../scheduler/base');
+
+class Contract {
+  chain: any;
+  constructor(chain, password) {
+    const contract = TransactionJobBase.getBridgeCore(chain);
+
+    this.chain = chain;
+    this.password = password;
+    this.keystore = keystore;
+    this.contract = new Ethers.Contract(
+      contract.address,
+      contract.abi,
+      new Ethers.Wallet(
+        new Wallet({
+          keystore: keystore,
+          password: this.password,
+        }).wallet.privateKey,
+        contract.provider
+      )
+    );
+  }
+
+  async execute() {
+    await this.runnable();
+  }
+
+  async runnable() {
+    console.log('');
+    console.log('+'.repeat(20));
+
+    await this.contract.setDepositSelector(
+      '0x0039f574eE5cC39bdD162E9A88e3EB1f111bAF48',
+      'burnFrom(address,uint256)',
+      false
+    ); //USDT
+    await this.contract.setDepositSelector(
+      '0x980a5AfEf3D17aD98635F6C5aebCBAedEd3c3430',
+      'burnFrom(address,uint256)',
+      false
+    ); //USDC
+    await this.contract.setWithdrawSelector(
+      '0x0039f574eE5cC39bdD162E9A88e3EB1f111bAF48',
+      'mint(address,uint256)',
+      false
+    ); //USDT
+    await this.contract.setWithdrawSelector(
+      '0x980a5AfEf3D17aD98635F6C5aebCBAedEd3c3430',
+      'mint(address,uint256)',
+      false
+    ); //USDC
+
+    console.log('-'.repeat(20));
+    console.log('');
+  }
+}
+
+program
+  .version('1.0.0')
+  .description(`Ϟ Create Operator Transaction Ϟ`)
+  .command('create', 'create operator transaction')
+  .argument('<chain>', 'blockchain', /^kcc|eth$/)
+  .action(async (args, options) => {
+    try {
+      console.log('');
+
+      await new Contract(
+        args.chain,
+        await password(`Please enter the password of the keystore:\n`, {
+          method: 'hide',
+        })
+      ).execute();
+
+      console.log('');
+    } catch (ex) {
+      console.error(ex);
+    }
+  });
+
+program.parse(process.argv);

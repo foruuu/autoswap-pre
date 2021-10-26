@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "ESNext",
+    "module": "CommonJS",
+    "declaration": true,
+    "noImplicitAny": false,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports":true,
+    "moduleResolution": "node",
+    "outDir": "./app",
+    "baseUrl": "./",
+    "paths": {
+       "*":["*"]
+    },
+    "lib": [
+      "ES2015"
+    ]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "compileOnSave": true
+}
